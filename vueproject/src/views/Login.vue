@@ -41,6 +41,9 @@ export default {
                 ],
             }
         }
+    },created() {
+        // 在应用启动时调用validate函数
+        this.validate();
     },
     methods: {
         login() {
@@ -49,6 +52,9 @@ export default {
                     this.request.post("http://localhost:9090/user/login", this.user).then(res => {
                         if(res.code === '200') {
                             localStorage.setItem("user", JSON.stringify(res.data))  // 存储用户信息到浏览器
+                            console.log(res.data)
+                            localStorage.setItem("sessionId", res.data.sessionId)
+                            console.log("res.data.sessionId: "+localStorage.getItem("sessionId"))
                             this.$router.push("/")  // 切换路由到主页
                             this.$message.success("登录成功")
                         } else {
@@ -65,13 +71,32 @@ export default {
             this.request.post("http://localhost:9090/user/login", this.visitorMsg).then(res => {
                 if(res.code === '200') {
                     localStorage.setItem("user", JSON.stringify(res.data))  // 存储用户信息到浏览器
+                    console.log(res.data)
+                    localStorage.setItem("sessionId", res.data.sessionId)
+                    console.log("res.data.sessionId: "+localStorage.getItem("sessionId"))
                     this.$router.push("/")  // 切换路由到主页
                     this.$message.success("欢迎")
                 } else {
                     this.$message.error(res.msg)
                 }
             })
-        }
+        },
+        validate() {
+            let sessionId = localStorage.getItem("sessionId");
+            console.log("session: "+sessionId)
+            if(sessionId != null) {
+                this.request.get("http://localhost:9090/user/validate").then(res => {
+                    if (res.code === '200') {
+                        // sessionId仍然有效
+                        localStorage.setItem("user", JSON.stringify(res.data))
+                        this.$router.push("/");
+                    } else {
+                        // sessionId无效
+                        console.log("sessionId无效")
+                    }
+                })
+            }
+        },
     }
 }
 </script>

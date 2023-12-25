@@ -6,8 +6,8 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import './assets/gloable.css'
 import request from "@/utils/request";
-// import axios from "axios";
-
+import axios from "axios";
+axios.defaults.withCredentials = true;
 Vue.config.productionTip = false
 
 Vue.use(ElementUI, { size: "mini" });

@@ -4,6 +4,7 @@ import com.example.springboot.common.Result;
 import com.example.springboot.controller.dto.UserDTO;
 import com.example.springboot.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * <p>
@@ -15,6 +16,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUserService extends IService<User> {
 
-    UserDTO login(UserDTO userDTO);
+    UserDTO login(UserDTO userDTO, HttpSession session);
     User register(UserDTO userDTO);
 }

@@ -11,6 +11,7 @@ import com.example.springboot.exception.ServiceException;
 import com.example.springboot.mapper.UserMapper;
 import com.example.springboot.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,10 +28,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private static final Log LOG = Log.get();
 
     @Override
-    public UserDTO login(UserDTO userDTO) {
+    public UserDTO login(UserDTO userDTO, HttpSession session) {
         User one = getUserInfo(userDTO);//查找
         if (one != null) {
+            session.setAttribute(session.getId(),one);
+            session.setMaxInactiveInterval(60*60*24);
             BeanUtil.copyProperties(one, userDTO, true);//将实体类对象拷贝到UserDTO中并返回
+            userDTO.setSessionId(session.getId());
+            System.out.println("sessionGetId："+session.getId());
             return userDTO;
         } else {
             throw new ServiceException(Constants.CODE_600, "用户名或密码错误");

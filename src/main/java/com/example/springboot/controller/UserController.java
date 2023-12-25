@@ -1,6 +1,7 @@
 package com.example.springboot.controller;
 
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelReader;
@@ -14,7 +15,9 @@ import com.example.springboot.controller.dto.UserDTO;
 import com.example.springboot.entity.User;
 import com.example.springboot.service.IUserService;
 import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.io.InputStream;
@@ -35,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")
 public class UserController {
 
     /*
@@ -49,13 +53,28 @@ public class UserController {
     private IUserService userService;
 
     @PostMapping("/login")
-    public Result login(@RequestBody UserDTO userDTO) {//登录检查
+    public Result login(@RequestBody UserDTO userDTO, HttpSession session) {//登录检查
         String username = userDTO.getUsername();
         String password = userDTO.getPassword();
         if (StrUtil.isBlank(username) || StrUtil.isBlank(password)) {
             return Result.error(Constants.CODE_400,"参数错误");
         }//校验
-        return Result.success(userService.login(userDTO));
+        return Result.success(userService.login(userDTO,session));
+    }
+    @GetMapping("/validate")
+    public Result validate(HttpSession session) {
+        String sessionId = session.getId();
+        System.out.println("sessionId："+sessionId);
+        User one = (User)session.getAttribute(sessionId);
+        if (one != null) {
+            UserDTO userDTO=new UserDTO();
+            BeanUtil.copyProperties(one, userDTO, true);
+            // session有效且用户存在，返回用户信息
+            return Result.success(userDTO);
+        } else {
+            // session无效或者用户不存在，返回错误
+            return Result.error(Constants.CODE_600,"Session已过期或不存在此用户");
+        }
     }
 
     @PostMapping("/register")// 注册
